@@ -1,0 +1,78 @@
+{
+  "manifest_version": 3,
+  "name": "Safe-web",
+  "version": "1.0.0",
+  "description": "Real-time detection and selective filtering of malicious online advertising. Filters malicious ads, preserves legitimate ones.",
+  "author": "Munzhelele Awelani",
+
+  "permissions": [
+    "webRequest",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "storage",
+    "tabs",
+    "notifications",
+    "activeTab",
+    "alarms",
+    "scripting"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["early-mode.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["page-hook.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Safe-web",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "blocklist_rules",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+
+  "minimum_chrome_version": "111"
+}
