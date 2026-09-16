@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Safe-web</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="sw-popup">
+    <!-- Header: product name on the left, current risk verdict on the right.
+         No logo mark or icon here on purpose; the popup is a status readout,
+         not a landing page. -->
+    <header class="sw-header">
+      <div class="sw-header-left">
+        <div class="sw-title">Safe-web</div>
+        <div class="sw-subtitle">Ad filtering for this site</div>
+      </div>
+      <div class="sw-header-right">
+        <!-- popup.js swaps the class on this pill (sw-pill-safe / low / medium / high / critical) -->
+        <span id="risk-pill" class="sw-pill sw-pill-safe">Safe</span>
+        <span id="scan-time" class="sw-scan-time">Scanned just now</span>
+      </div>
+    </header>
+
+    <!-- Current tab url-dot carries a text label from CSS so the state is not communicated by colour alone. -->
+    <div class="sw-url-row">
+      <span id="site-url" class="sw-url">&mdash;</span>
+      <span id="url-dot" class="sw-dot"></span>
+    </div>
+
+    <nav class="sw-tabs">
+      <button class="sw-tab sw-tab-active" data-tab="report">Report</button>
+      <button class="sw-tab" data-tab="log">Detections</button>
+      <button class="sw-tab" data-tab="filtering">Filtering</button>
+      <button class="sw-tab" data-tab="whitelist">Trusted</button>
+    </nav>
+
+    <main class="sw-content">
+      <!-- REPORT TAB  -->
+      <section id="tab-report" class="sw-panel sw-panel-active">
+        <!-- Counters are a plain label readout popup.js finds each one by its data-key, so the keys must not change. -->
+        <div class="sw-stats-grid" id="stats-grid">
+          <div class="sw-stat-card" data-key="popups">
+            <div class="sw-stat-label">Pop-ups blocked</div>
+            <div class="sw-stat-num">0</div>
+          </div>
+          <div class="sw-stat-card" data-key="adsFound">
+            <div class="sw-stat-label">Ads found</div>
+            <div class="sw-stat-num">0</div>
+          </div>
+          <div class="sw-stat-card" data-key="adsBlocked">
+            <div class="sw-stat-label">Ads blocked</div>
+            <div class="sw-stat-num">0</div>
+          </div>
+          <div class="sw-stat-card" data-key="tracking">
+            <div class="sw-stat-label">Tracking requests</div>
+            <div class="sw-stat-num">0</div>
+          </div>
+          <div class="sw-stat-card" data-key="scripts">
+            <div class="sw-stat-label">Suspicious scripts</div>
+            <div class="sw-stat-num">0</div>
+          </div>
+          <div class="sw-stat-card" data-key="iframes">
+            <div class="sw-stat-label">Unsafe iframes</div>
+            <div class="sw-stat-num">0</div>
+          </div>
+          <div class="sw-stat-card" data-key="redirects">
+            <div class="sw-stat-label">Redirects flagged</div>
+            <div class="sw-stat-num">0</div>
+          </div>
+        </div>
+
+        <!-- Risk meter. popup.js sets the fill width only -->
+        <div class="sw-risk-section">
+          <div class="sw-risk-label">Risk level</div>
+          <div class="sw-risk-track">
+            <div id="risk-fill" class="sw-risk-fill"></div>
+          </div>
+          <div class="sw-risk-scale">
+            <span>Safe</span><span>Low</span><span>Medium</span><span>High</span><span>Critical</span>
+          </div>
+        </div>
+      </section>
+
+      <!--DETECTION LOG TAB -->
+      <section id="tab-log" class="sw-panel">
+        <div class="sw-log-toolbar">
+          <span id="entry-count">0 entries</span>
+          <button id="clear-log" class="sw-link-btn">Clear</button>
+        </div>
+        <div id="log-list" class="sw-log-list">
+          <div class="sw-empty">No detections yet</div>
+        </div>
+      </section>
+
+      <!-- FILTERING TAB -->
+      <section id="tab-filtering" class="sw-panel">
+        <div class="sw-section-label">Filtering mode for <span id="filter-domain">this site</span></div>
+
+        <label class="sw-mode-option" data-mode="FILTER_ONLY">
+          <input type="radio" name="filter-mode" value="FILTER_ONLY" />
+          <div class="sw-mode-text">
+            <div class="sw-mode-title">Filter only</div>
+            <div class="sw-mode-desc">Blocks malicious ads, lets legitimate ad networks through</div>
+          </div>
+          <span class="sw-mode-badge sw-badge-green">Recommended</span>
+        </label>
+
+        <label class="sw-mode-option" data-mode="BLOCK_ALL">
+          <input type="radio" name="filter-mode" value="BLOCK_ALL" />
+          <div class="sw-mode-text">
+            <div class="sw-mode-title">Block all</div>
+            <div class="sw-mode-desc">Blocks every advertisement and tracking request</div>
+          </div>
+          <span class="sw-mode-badge sw-badge-red">Strict</span>
+        </label>
+
+        <label class="sw-mode-option" data-mode="ALLOW_ALL">
+          <input type="radio" name="filter-mode" value="ALLOW_ALL" />
+          <div class="sw-mode-text">
+            <div class="sw-mode-title">Allow all</div>
+            <div class="sw-mode-desc">Turns filtering off on this site</div>
+          </div>
+          <span class="sw-mode-badge sw-badge-amber">Off</span>
+        </label>
+
+        <p class="sw-info-note">Your choice is saved per site and applied on your next visit.</p>
+
+        <div class="sw-filter-actions">
+          <button id="save-site" class="sw-btn sw-btn-primary">Save for this site</button>
+          <button id="apply-global" class="sw-btn sw-btn-ghost">Apply everywhere</button>
+        </div>
+      </section>
+
+      <!--WHITELIST TAB -->
+      <section id="tab-whitelist" class="sw-panel">
+        <div class="sw-section-label">Trusted ad networks</div>
+        <p class="sw-sub">Ads served from these domains always pass through, whatever the filtering mode.</p>
+
+        <div class="sw-whitelist-input-row">
+          <input id="whitelist-input" class="sw-input" type="text" placeholder="doubleclick.net" />
+          <button id="whitelist-add" class="sw-btn sw-btn-primary sw-btn-compact">Add</button>
+        </div>
+
+        <div id="whitelist-list" class="sw-whitelist-list"></div>
+      </section>
+    </main>
+
+    <footer class="sw-footer">
+      <!-- popup.js keeps this disabled until the risk score passes 70 -->
+      <button id="leave-page" class="sw-btn sw-btn-danger">Leave this page</button>
+      <button id="rescan" class="sw-btn sw-btn-ghost">Rescan</button>
+    </footer>
+    <div class="sw-version-row">
+      <span>Safe-web 1.0.0</span>
+      <span>Awelani Munzhelele</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
