@@ -1,0 +1,598 @@
+/*
+ * Safe-web - popup.css
+ *
+ * Visual direction: a quiet instrument panel, not a security dashboard.
+ * Flat paper background, hairline rules, one slate-blue accent used only for
+ * things you can act on, and warning colour reserved for actual findings.
+ * Class names are unchanged from the previous version so popup.js still works.
+ */
+
+:root {
+  --sw-paper: #f6f6f4;        /* window background */
+  --sw-surface: #ffffff;      /* panels and inputs */
+  --sw-ink: #1b1c1e;          /* primary text */
+  --sw-ink-soft: #5f6165;     /* labels, secondary text */
+  --sw-ink-faint: #8b8d91;    /* timestamps, footnotes */
+  --sw-line: #e0e0db;         /* hairlines */
+  --sw-line-strong: #c9c9c2;  /* input borders, selected state */
+  --sw-accent: #35566e;       /* the single accent: buttons, selection */
+  --sw-signal: #9c3b2e;       /* blocked / high risk only */
+  --sw-caution: #8a6a1f;      /* flagged but not blocked */
+  --sw-ok: #3f6b4a;           /* allowed / trusted */
+  --sw-radius: 4px;
+}
+
+/* Browsers in dark mode get the same layout with inverted tokens, so nothing
+   below this block needs a second set of rules. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sw-paper: #151618;
+    --sw-surface: #1c1d20;
+    --sw-ink: #e8e8e6;
+    --sw-ink-soft: #a0a2a6;
+    --sw-ink-faint: #7a7c80;
+    --sw-line: #2b2d30;
+    --sw-line-strong: #3b3d41;
+    --sw-accent: #8fb4cd;
+    --sw-signal: #d38779;
+    --sw-caution: #c2a45f;
+    --sw-ok: #8fb89a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 340px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  background: var(--sw-paper);
+  color: var(--sw-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible keyboard focus everywhere, since the popup is often driven by keyboard. */
+:focus-visible {
+  outline: 2px solid var(--sw-accent);
+  outline-offset: 1px;
+}
+
+.sw-popup {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+.sw-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 14px 11px;
+  background: var(--sw-surface);
+  border-bottom: 1px solid var(--sw-line);
+}
+
+.sw-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sw-subtitle {
+  font-size: 11.5px;
+  color: var(--sw-ink-soft);
+}
+
+.sw-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* The verdict reads as a word, not a glowing chip. Only high and critical
+   pick up colour, so a coloured pill always means something. */
+.sw-pill {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sw-pill-safe {
+  color: var(--sw-ok);
+}
+
+.sw-pill-low,
+.sw-pill-medium {
+  color: var(--sw-caution);
+}
+
+.sw-pill-high,
+.sw-pill-critical {
+  color: var(--sw-signal);
+}
+
+.sw-scan-time {
+  font-size: 10.5px;
+  color: var(--sw-ink-faint);
+}
+
+/* ---------- Current site ---------- */
+.sw-url-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--sw-surface);
+  border-bottom: 1px solid var(--sw-line);
+}
+
+.sw-url {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--sw-ink);
+}
+
+/* Written state rather than a coloured dot. popup.js only toggles the
+   sw-dot-unsafe class, so the label is generated here in CSS. */
+.sw-dot {
+  font-size: 10.5px;
+  color: var(--sw-ink-faint);
+  flex-shrink: 0;
+}
+
+.sw-dot::after {
+  content: "Secure";
+}
+
+.sw-dot.sw-dot-unsafe {
+  color: var(--sw-signal);
+}
+
+.sw-dot.sw-dot-unsafe::after {
+  content: "Not secure";
+}
+
+/* ---------- Tabs ---------- */
+.sw-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 8px;
+  background: var(--sw-surface);
+  border-bottom: 1px solid var(--sw-line);
+}
+
+.sw-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--sw-ink-soft);
+  font: inherit;
+  font-size: 12px;
+  padding: 9px 2px;
+  cursor: pointer;
+}
+
+.sw-tab:hover {
+  color: var(--sw-ink);
+}
+
+.sw-tab-active {
+  color: var(--sw-ink);
+  font-weight: 600;
+  border-bottom-color: var(--sw-accent);
+}
+
+/* ---------- Content area ---------- */
+.sw-content {
+  min-height: 290px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+.sw-panel {
+  display: none;
+}
+
+.sw-panel-active {
+  display: block;
+}
+
+/* ---------- Report tab ---------- */
+/* Label on the left, count on the right, separated by hairlines. Reads like a
+   receipt, which is what it is. */
+.sw-stats-grid {
+  border-top: 1px solid var(--sw-line);
+  margin-bottom: 18px;
+}
+
+.sw-stat-card {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--sw-line);
+}
+
+.sw-stat-label {
+  font-size: 12px;
+  color: var(--sw-ink-soft);
+}
+
+.sw-stat-num {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--sw-ink);
+}
+
+.sw-risk-label {
+  font-size: 12px;
+  color: var(--sw-ink-soft);
+  margin-bottom: 6px;
+}
+
+.sw-risk-track {
+  height: 4px;
+  background: var(--sw-line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* One flat tone. The number beside it, and the verdict in the header, carry
+   the severity; the bar only carries the magnitude. */
+.sw-risk-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--sw-accent);
+  transition: width 0.2s ease;
+}
+
+.sw-risk-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--sw-ink-faint);
+  margin-top: 5px;
+}
+
+/* ---------- Detection log tab ---------- */
+.sw-log-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11.5px;
+  color: var(--sw-ink-soft);
+  margin-bottom: 10px;
+}
+
+.sw-link-btn {
+  background: none;
+  border: none;
+  color: var(--sw-accent);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sw-link-btn:hover {
+  text-decoration: underline;
+}
+
+.sw-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--sw-line);
+  border: 1px solid var(--sw-line);
+  border-radius: var(--sw-radius);
+  overflow: hidden;
+}
+
+/* The left rule is the only colour in an entry: blocked, flagged, allowed. */
+.sw-log-entry {
+  background: var(--sw-surface);
+  border-left: 2px solid var(--sw-signal);
+  padding: 8px 10px;
+}
+
+.sw-log-entry.sw-log-amber {
+  border-left-color: var(--sw-caution);
+}
+
+.sw-log-entry.sw-log-green {
+  border-left-color: var(--sw-ok);
+}
+
+.sw-log-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.sw-log-type {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sw-ink);
+}
+
+.sw-log-time {
+  font-size: 10.5px;
+  color: var(--sw-ink-faint);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.sw-log-summary {
+  font-size: 12px;
+  color: var(--sw-ink-soft);
+  margin-top: 2px;
+}
+
+.sw-log-url {
+  font-size: 11px;
+  color: var(--sw-ink-faint);
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sw-empty {
+  background: var(--sw-surface);
+  font-size: 12px;
+  color: var(--sw-ink-faint);
+  padding: 22px 12px;
+  text-align: center;
+}
+
+/* ---------- Filtering tab ---------- */
+.sw-section-label {
+  font-size: 12px;
+  color: var(--sw-ink-soft);
+  margin-bottom: 10px;
+}
+
+.sw-section-label span {
+  color: var(--sw-ink);
+}
+
+.sw-mode-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--sw-surface);
+  border: 1px solid var(--sw-line);
+  border-radius: var(--sw-radius);
+  padding: 10px 11px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.sw-mode-option:hover {
+  border-color: var(--sw-line-strong);
+}
+
+/* Selection is shown by the border, without a tinted background wash. */
+.sw-mode-option:has(input:checked) {
+  border-color: var(--sw-accent);
+}
+
+.sw-mode-option input {
+  margin-top: 2px;
+  accent-color: var(--sw-accent);
+}
+
+.sw-mode-text {
+  flex: 1;
+}
+
+.sw-mode-title {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.sw-mode-desc {
+  font-size: 11.5px;
+  color: var(--sw-ink-soft);
+  margin-top: 1px;
+}
+
+/* Badges are plain words in the relevant tone, no filled chips. */
+.sw-mode-badge {
+  font-size: 10.5px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sw-badge-green {
+  color: var(--sw-ok);
+}
+
+.sw-badge-red {
+  color: var(--sw-signal);
+}
+
+.sw-badge-amber {
+  color: var(--sw-caution);
+}
+
+.sw-info-note {
+  font-size: 11.5px;
+  color: var(--sw-ink-faint);
+  margin-top: 10px;
+}
+
+.sw-filter-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ---------- Whitelist tab ---------- */
+.sw-sub {
+  font-size: 11.5px;
+  color: var(--sw-ink-soft);
+  margin-bottom: 12px;
+}
+
+.sw-whitelist-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sw-input {
+  flex: 1;
+  background: var(--sw-surface);
+  border: 1px solid var(--sw-line-strong);
+  border-radius: var(--sw-radius);
+  color: var(--sw-ink);
+  font: inherit;
+  font-size: 12.5px;
+  padding: 7px 9px;
+}
+
+.sw-input::placeholder {
+  color: var(--sw-ink-faint);
+}
+
+.sw-input:focus {
+  outline: none;
+  border-color: var(--sw-accent);
+}
+
+.sw-whitelist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sw-whitelist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--sw-surface);
+  border: 1px solid var(--sw-line);
+  border-radius: var(--sw-radius);
+  padding: 7px 9px;
+  font-size: 12.5px;
+}
+
+.sw-whitelist-domain {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sw-check {
+  color: var(--sw-ok);
+  font-size: 11px;
+}
+
+.sw-remove {
+  background: none;
+  border: none;
+  color: var(--sw-ink-faint);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.sw-remove:hover {
+  color: var(--sw-signal);
+}
+
+/* ---------- Buttons ---------- */
+.sw-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--sw-radius);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sw-btn-compact {
+  flex: none;
+  padding: 8px 14px;
+}
+
+.sw-btn-primary {
+  background: var(--sw-accent);
+  color: var(--sw-surface);
+}
+
+.sw-btn-primary:hover {
+  filter: brightness(1.12);
+}
+
+.sw-btn-ghost {
+  background: var(--sw-surface);
+  border-color: var(--sw-line-strong);
+  color: var(--sw-ink);
+}
+
+.sw-btn-ghost:hover {
+  background: var(--sw-paper);
+}
+
+/* Destructive action: outlined, never a solid red block. */
+.sw-btn-danger {
+  background: var(--sw-surface);
+  border-color: var(--sw-line-strong);
+  color: var(--sw-signal);
+}
+
+.sw-btn-danger:hover:not(:disabled) {
+  border-color: var(--sw-signal);
+}
+
+.sw-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Footer ---------- */
+.sw-footer {
+  display: flex;
+  gap: 8px;
+  padding: 11px 14px;
+  background: var(--sw-surface);
+  border-top: 1px solid var(--sw-line);
+}
+
+.sw-version-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 14px 10px;
+  background: var(--sw-surface);
+  font-size: 10.5px;
+  color: var(--sw-ink-faint);
+}
+
+/* Respect the system setting for people who turn animation down. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
