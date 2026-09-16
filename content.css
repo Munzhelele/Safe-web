@@ -1,0 +1,157 @@
+/*
+ * Safe-web - content.css
+ *
+ * Styles the first-visit consent prompt injected by content.js. It sits on
+ * top of someone else's page, so it stays small, light and plainly worded
+ * rather than looking like an alert the page itself threw up. All values are
+ * hard-coded instead of using custom properties, because the host page may
+ * define variables of its own.
+ */
+
+#safeweb-consent-overlay,
+#safeweb-consent-overlay * {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.45;
+}
+
+#safeweb-consent-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  pointer-events: none; /* only the card itself should catch clicks */
+}
+
+/* No dimming layer over the page: the prompt is a request, not a block. */
+#safeweb-consent-overlay .sw-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 16px;
+}
+
+#safeweb-consent-overlay .sw-card {
+  pointer-events: auto;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: #ffffff;
+  border: 1px solid #d8d8d2;
+  border-radius: 6px;
+  padding: 16px;
+  color: #1b1c1e;
+  font-size: 13px;
+  box-shadow: 0 6px 24px rgba(20, 20, 20, 0.14);
+}
+
+/* Small provenance line so people know which extension is asking. */
+#safeweb-consent-overlay .sw-badge {
+  display: block;
+  font-size: 11px;
+  color: #8b8d91;
+  margin-bottom: 2px;
+}
+
+#safeweb-consent-overlay .sw-domain {
+  font-size: 12px;
+  color: #5f6165;
+  margin-bottom: 6px;
+}
+
+#safeweb-consent-overlay .sw-headline {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+#safeweb-consent-overlay .sw-sub {
+  font-size: 12px;
+  color: #5f6165;
+  margin-bottom: 12px;
+}
+
+#safeweb-consent-overlay .sw-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid #e0e0db;
+  border-radius: 4px;
+  background: #ffffff;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+#safeweb-consent-overlay .sw-option:hover {
+  border-color: #c9c9c2;
+}
+
+/* Selection shows in the border only, with no tinted fill behind the text. */
+#safeweb-consent-overlay .sw-option.sw-selected {
+  border-color: #35566e;
+}
+
+#safeweb-consent-overlay .sw-option input {
+  margin-top: 2px;
+  accent-color: #35566e;
+}
+
+#safeweb-consent-overlay .sw-opt-title {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+#safeweb-consent-overlay .sw-opt-desc {
+  font-size: 11.5px;
+  color: #5f6165;
+  margin-top: 1px;
+}
+
+#safeweb-consent-overlay .sw-persist-note {
+  font-size: 11px;
+  color: #8b8d91;
+  margin: 8px 0 12px;
+}
+
+#safeweb-consent-overlay .sw-actions {
+  display: flex;
+  gap: 8px;
+}
+
+#safeweb-consent-overlay .sw-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#safeweb-consent-overlay .sw-btn-ghost {
+  background: #ffffff;
+  border-color: #c9c9c2;
+  color: #1b1c1e;
+}
+
+#safeweb-consent-overlay .sw-btn-ghost:hover {
+  background: #f6f6f4;
+}
+
+#safeweb-consent-overlay .sw-btn-primary {
+  background: #35566e;
+  color: #ffffff;
+}
+
+#safeweb-consent-overlay .sw-btn-primary:hover {
+  background: #2b475c;
+}
+
+#safeweb-consent-overlay .sw-btn:focus-visible,
+#safeweb-consent-overlay .sw-option:focus-within {
+  outline: 2px solid #35566e;
+  outline-offset: 1px;
+}
